@@ -1,11 +1,16 @@
 """Environment-based configuration with no implicit provider switching."""
 from __future__ import annotations
+
 import os
 from dataclasses import dataclass
 from typing import Mapping
+
+from dotenv import load_dotenv
+
 from .errors import ConfigurationError
 
 SUPPORTED_PROVIDERS = ("deepseek", "zai")
+
 
 @dataclass(frozen=True)
 class ProviderConfig:
@@ -27,9 +32,14 @@ class ProviderConfig:
         if self.timeout_seconds <= 0:
             raise ConfigurationError("timeout_seconds must be greater than zero.")
 
+
 def load_config(environ: Mapping[str, str] | None = None, *, provider: str | None = None) -> ProviderConfig:
-    """Load one explicitly selected provider from environment variables."""
-    env = os.environ if environ is None else environ
+    """Load one explicitly selected provider from environment variables or a local .env file."""
+    if environ is None:
+        load_dotenv(override=False)
+        env: Mapping[str, str] = os.environ
+    else:
+        env = environ
     selected = (provider or env.get("ATLAS_PROVIDER", "deepseek")).strip().lower()
     if selected not in SUPPORTED_PROVIDERS:
         raise ConfigurationError(f"Unsupported provider {selected!r}; choose one of {SUPPORTED_PROVIDERS}.")
