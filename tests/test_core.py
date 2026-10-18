@@ -46,6 +46,15 @@ def test_deepseek_reasoning_options_follow_documented_request_shape():
     assert "reasoning_effort" not in transport.kwargs["extra_body"]
 
 
+def test_deepseek_reasoning_rejects_unsupported_temperature_combination():
+    transport = FakeTransport()
+    with pytest.raises(ValueError, match="does not support temperature"):
+        OpenAICompatibleAdapter(config(), transport=transport).chat(
+            [{"role": "user", "content": "x"}], reasoning="high", temperature=0.2
+        )
+    assert transport.kwargs is None
+
+
 def test_invalid_reasoning_is_rejected_before_request():
     transport = FakeTransport()
     with pytest.raises(ValueError, match="reasoning must be"):

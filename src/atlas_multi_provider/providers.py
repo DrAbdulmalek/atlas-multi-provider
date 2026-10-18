@@ -41,6 +41,15 @@ class OpenAICompatibleAdapter:
         if not messages:
             raise ValueError("messages must contain at least one message.")
         payload: dict[str, Any] = {"model": self.config.model, "messages": messages}
+
+        # DeepSeek documents temperature as unsupported in thinking mode.
+        # Reject the conflicting request rather than silently ignoring temperature.
+        if self.config.provider == "deepseek" and reasoning is not None and temperature is not None:
+            raise ValueError(
+                "DeepSeek thinking mode does not support temperature; omit temperature "
+                "or disable thinking explicitly in a future provider-specific API."
+            )
+
         if temperature is not None:
             payload["temperature"] = temperature
         if max_tokens is not None:
