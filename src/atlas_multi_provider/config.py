@@ -40,7 +40,9 @@ def load_config(environ: Mapping[str, str] | None = None, *, provider: str | Non
         env: Mapping[str, str] = os.environ
     else:
         env = environ
-    selected = (provider or env.get("ATLAS_PROVIDER", "deepseek")).strip().lower()
+    # An explicitly supplied empty string is invalid; do not silently fall back to env.
+    selected_value = provider if provider is not None else env.get("ATLAS_PROVIDER", "deepseek")
+    selected = selected_value.strip().lower()
     if selected not in SUPPORTED_PROVIDERS:
         raise ConfigurationError(f"Unsupported provider {selected!r}; choose one of {SUPPORTED_PROVIDERS}.")
     prefix = "DEEPSEEK" if selected == "deepseek" else "ZAI"
