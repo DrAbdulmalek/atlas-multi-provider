@@ -38,8 +38,10 @@ The example makes a live API request and may incur charges. Unit tests do not.
 
 ## Reasoning controls
 
-- DeepSeek: when explicitly requested, the adapter sends the configured thinking switch and reasoning_effort for low, high, or max. Confirm the selected model and API support these controls before live use.
-- Z.ai/GLM: generic reasoning control is rejected until the exact API contract is implemented and verified. Ordinary chat calls omit reasoning-specific fields.
+- **DeepSeek:** when explicitly requested, the adapter sends `reasoning_effort` as a top-level Chat Completions parameter and `thinking.type=enabled` through the OpenAI SDK's `extra_body`, following the official API guide. Supported values in this wrapper are `low`, `high`, and `max`.
+- **Z.ai/GLM:** generic reasoning control is rejected until model-specific behavior is implemented and verified. GLM reasoning controls vary by model family and version; ordinary chat calls omit reasoning-specific fields.
+
+Reasoning is optional. This wrapper does not expose or log private reasoning content; callers should use the model's user-facing response content and follow provider policies.
 
 ## Tests
 
